@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Broadcast Host — Local Audio Broadcast</title>
+<style>
+  body {
+    font-family: -apple-system, Segoe UI, Roboto, sans-serif;
+    background: #111827;
+    color: #f3f4f6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    margin: 0;
+  }
+  h1 { font-size: 1.5rem; margin-bottom: 4px; }
+  p.subtitle { color: #9ca3af; margin-top: 0; }
+  #warning {
+    background: #7f1d1d;
+    color: #fecaca;
+    padding: 12px 16px;
+    border-radius: 8px;
+    max-width: 480px;
+    text-align: center;
+    display: none;
+    margin-bottom: 16px;
+  }
+
+  #modeSwitch {
+    display: flex;
+    gap: 12px;
+    margin: 16px 0 24px;
+  }
+  #modeSwitch button {
+    background: #1f2937;
+    color: #d1d5db;
+    border: 2px solid #374151;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 12px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  #modeSwitch button.active {
+    background: #1e3a8a;
+    border-color: #3b82f6;
+    color: white;
+  }
+  #modeSwitch button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  button#startBtn {
+    background: #22c55e;
+    color: #052e16;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 16px 32px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin: 20px 0;
+  }
+  button#startBtn:disabled {
+    background: #4b5563;
+    color: #9ca3af;
+    cursor: not-allowed;
+  }
+  button#startBtn.live {
+    background: #ef4444;
+    color: white;
+  }
+  #status {
+    font-size: 0.95rem;
+    color: #9ca3af;
+    margin-bottom: 20px;
+  }
+
+  #syncPanel { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 480px; }
+  #syncPanel video {
+    width: 100%;
+    max-width: 480px;
+    background: black;
+    border-radius: 10px;
+  }
+  #syncFilePath {
+    color: #9ca3af;
+    font-size: 0.85rem;
+    margin: 8px 0 16px;
+    text-align: center;
+    word-break: break-all;
+  }
+  #syncFilePath.error { color: #f87171; }
+  #syncFilePath.ok { color: #4ade80; }
+
+  #syncPathForm {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    margin-top: 4px;
+  }
+  #syncPathInput {
+    flex: 1;
+    background: #1f2937;
+    border: 2px solid #374151;
+    color: #f3f4f6;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+  }
+  #syncPathInput:focus {
+    outline: none;
+    border-color: #3b82f6;
+  }
+  #syncPathForm button {
+    background: #374151;
+    color: #f3f4f6;
+    border: none;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  #syncControls {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  #syncControls button {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  #syncControls button:disabled {
+    background: #4b5563;
+    cursor: not-allowed;
+  }
+
+  #qrBox {
+    background: white;
+    padding: 16px;
+    border-radius: 12px;
+    display: none;
+    margin-top: 24px;
+  }
+  #qrBox img { display: block; width: 220px; height: 220px; }
+  #joinUrl {
+    margin-top: 12px;
+    color: #93c5fd;
+    font-size: 0.95rem;
+    word-break: break-all;
+  }
+  #listenerCount {
+    margin-top: 24px;
+    font-size: 1.1rem;
+  }
+  #listenerCount span {
+    font-weight: 700;
+    color: #22c55e;
+  }
+</style>
+</head>
+<body>
+  <h1>Local Audio Broadcast</h1>
+  <p class="subtitle">Host — share this laptop's playback with phones on the same WiFi</p>
+
+  <div id="warning">
+    Please open this page in Chrome or Edge to broadcast audio.
+  </div>
+
+  <div id="modeSwitch">
+    <button id="modeBroadcastBtn" class="active">Broadcast Audio</button>
+    <button id="modeSyncBtn">Sync Local File</button>
+  </div>
+
+  <!-- Broadcast Audio mode -->
+  <div id="broadcastPanel">
+    <button id="startBtn">Start broadcast</button>
+  </div>
+
+  <!-- Sync Local File mode -->
+  <div id="syncPanel">
+    <video id="syncVideo" controls></video>
+    <div id="syncFilePath"></div>
+    <form id="syncPathForm">
+      <input id="syncPathInput" type="text" placeholder="Full path to a local video file, e.g. D:\Movies\film.mp4" autocomplete="off" />
+      <button type="submit" id="syncPathSetBtn">Set</button>
+    </form>
+    <div id="syncControls">
+      <button id="syncStartBtn">Start sync session</button>
+      <button id="syncEndBtn" disabled>End session</button>
+    </div>
+  </div>
+
+  <div id="status"></div>
+
+  <div id="qrBox">
+    <img id="qrImg" alt="QR code to join" />
+  </div>
+  <div id="joinUrl"></div>
+
+  <div id="listenerCount">Listeners connected: <span id="count">0</span></div>
+
+  <script src="host.js"></script>
+</body>
+</html>

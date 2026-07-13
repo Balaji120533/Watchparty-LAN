@@ -1,0 +1,14 @@
+{
+  "name": "local-audio-broadcast",
+  "version": "1.0.0",
+  "description": "Broadcast host laptop audio to phones over LAN via WebRTC",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "qrcode": "^1.5.3",
+    "ws": "^8.17.0"
+  }
+}
