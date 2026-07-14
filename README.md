@@ -34,7 +34,7 @@ The terminal will print something like:
 ```
 Local Audio Broadcast server running
   Host (open in Chrome/Edge): http://localhost:3000
-  Guest join URL:             http://192.168.1.42:3000/listen
+  Guest join URL:             http://<IP_ADDRESS>:3000/listen
 ```
 
 ## Running a Broadcast Audio session
