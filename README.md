@@ -37,6 +37,20 @@ Local Audio Broadcast server running
   Guest join URL:             http://192.168.1.42:3000/listen
 ```
 
+### Windows Firewall (first time only, on each host machine)
+
+Windows blocks incoming connections to Node.js by default, so guests won't
+be able to load the page even though the server is running. **On the host
+laptop**, open PowerShell **as Administrator** and run:
+
+```powershell
+New-NetFirewallRule -DisplayName "Local Audio Broadcast" -Direction Inbound -Protocol TCP -LocalPort 3000 -Action Allow -Profile Any
+```
+
+This only opens port 3000 (the port this app uses) — it doesn't weaken the
+firewall otherwise. You only need to do this **once per laptop** that hosts
+a session; it's not needed on guest devices.
+
 ## Running a Broadcast Audio session
 
 1. Open **`http://localhost:3000`** in Chrome or Edge on the host laptop
@@ -80,8 +94,10 @@ for those.
 - **Latency:** ~100–200ms is expected on the WebRTC LAN path.
 - **No internet used:** signaling and streaming stay on your LAN, no
   STUN/TURN.
-- **Guest can't connect?** Usually router AP/client isolation. Fallback:
-  use the host's phone as a WiFi hotspot instead.
+- **Guest page won't load at all?** First check Windows Firewall on the
+  host (see setup step above) — this is the most common cause on a new
+  laptop. If firewall is fine, it's usually router AP/client isolation;
+  fallback is to use the host's phone as a WiFi hotspot instead.
 - **Sync mode is local files only** — no file to serve for Netflix/Prime,
   use Broadcast Audio for those.
 - **Sync mode is independent per guest** — once started, everyone (host
